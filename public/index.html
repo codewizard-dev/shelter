@@ -138,6 +138,16 @@ h2{font-size:26px}
 .gate{min-height:80vh;display:flex;align-items:center;justify-content:center}
 .gate .panel{max-width:520px;text-align:center;align-items:center;padding:32px}
 .gate h1{font:400 clamp(64px,18vw,120px)/1 var(--f-logo);color:var(--acc)}
+.reveal{border-color:rgba(255,53,0,.35)}
+.rvgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.rv{background:#151515;border:1px solid var(--line);border-radius:10px;padding:10px 0 6px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.rv.now{border-color:var(--acc)}
+.rvh{padding:0 14px 6px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.rvh b{font:600 16px var(--f-disp);overflow-wrap:anywhere}
+.vlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.vrow{display:flex;gap:8px;align-items:center;background:#151515;border:1px solid var(--line);border-radius:8px;padding:8px 12px;min-width:0}
+.vrow span,.vrow b{overflow-wrap:anywhere}
+.vrow .arr{color:var(--acc);font-weight:600}
 footer{color:var(--mute);font-size:13px;display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:1px solid var(--line);text-align:center}
 @media(max-width:600px){.top{grid-template-columns:1fr auto}.top>.pill{display:none}.brand{font-size:22px;text-align:left}}
 @media(prefers-reduced-motion:no-preference){.btn,.chip,.mode{transition:background .15s,border-color .15s}}
@@ -161,6 +171,7 @@ const MODES=[
  {id:"blitz",name:"Блиц",desc:"Три раунда и короткие таймеры. Партия на 15 минут, когда нет времени на долгие споры.",rounds:3,open:30,discuss:60,vote:30}
 ];
 const MODE=id=>MODES.find(m=>m.id===id)||MODES[0];
+const TURN=m=>m.id==="blitz"?25:45;
 
 /* Формат: "текст|оценка полезности". {м|ж} подставляет окончание по полу. */
 const POOL={
@@ -219,7 +230,7 @@ const KEY="b18";
 let ADULT=false;try{ADULT=sessionStorage.getItem(KEY)==="1"}catch(e){}
 let K={db:null,user:null,sample:null,uid:null,me:null,canWrite:null,ready:false};
 const NET={kind:null,code:null,unsubs:[]};
-let ROOM=null,PLAYERS={},HAND=null,HAND_LOADED=false,HANDS={},VIEW=null,SHOW=false,SENTFULL=false,HANDBUSY=false,LAST="",AUTOKEY="",TALLYKEY="",PUBUNSUB=null,PUB=[];
+let ADVKEY="",LTURN="",ROOM=null,PLAYERS={},HAND=null,HAND_LOADED=false,HANDS={},VIEW=null,SHOW=false,SENTFULL=false,HANDBUSY=false,LAST="",AUTOKEY="",TALLYKEY="",PUBUNSUB=null,PUB=[];
 const SAVED={nick:""};try{SAVED.nick=localStorage.getItem("b18nick")||""}catch(e){}
 const myId=()=>NET.kind==="local"?VIEW:K.uid;
 const plist=()=>Object.entries(PLAYERS).map(([id,p])=>Object.assign({id},p)).sort((a,b)=>(a.joined-b.joined)||(a.id<b.id?-1:1));
@@ -287,7 +298,7 @@ function watchPublic(){
   }catch(e){}
 }
 function unsubAll(){NET.unsubs.forEach(u=>{try{u()}catch(e){}});NET.unsubs=[]}
-function resetGame(){unsubAll();ROOM=null;PLAYERS={};HAND=null;HAND_LOADED=false;HANDS={};VIEW=null;SHOW=false;SENTFULL=false;HANDBUSY=false;NET.kind=null;NET.code=null;LAST="";AUTOKEY="";TALLYKEY=""}
+function resetGame(){unsubAll();ROOM=null;PLAYERS={};HAND=null;HAND_LOADED=false;HANDS={};VIEW=null;SHOW=false;SENTFULL=false;HANDBUSY=false;NET.kind=null;NET.code=null;LAST="";AUTOKEY="";TALLYKEY="";ADVKEY="";LTURN=""}
 function subscribe(code){
   NET.kind="online";NET.code=code;
   const db=K.db;
@@ -365,7 +376,7 @@ function startGameFixed(){
   for(let i=0;i<R;i++)plan.push(base+(i<extra?1:0));
   if(NET.kind==="local")ps.forEach(p=>{HANDS[p.id]=genHand(ROOM.mode);});
   wRoom({phase:"open",round:1,rounds:R,plan,seats,eliminated:[],seed:Math.random().toString(36).slice(2,10),
-    cata:{t:c[0],d:c[1],h:+c[2]},bunker:genBunker(),event:eventFor(m,1),deadline:Date.now()+m.open*1000,lastOut:[],tally:{},penalty:null});
+    cata:{t:c[0],d:c[1],h:+c[2]},bunker:genBunker(),event:eventFor(m,1),turnOrder:ps.map(p=>p.id),turn:0,deadline:Date.now()+TURN(m)*1000,lastOut:[],tally:{},penalty:null});
 }
 function toDiscuss(){wRoom({phase:"discuss",deadline:Date.now()+MODE(ROOM.mode).discuss*1000})}
 function toVote(){wRoom({phase:"vote",deadline:Date.now()+MODE(ROOM.mode).vote*1000})}
@@ -386,12 +397,27 @@ function nextRound(){
     wRoom({phase:"final",deadline:null});return;
   }
   const r=ROOM.round+1;
-  wRoom({phase:"open",round:r,event:eventFor(m,r),deadline:Date.now()+m.open*1000,lastOut:[],tally:{},penalty:null});
+  const al=alive().map(p=>p.id),sh=(r-1)%al.length,ord=al.slice(sh).concat(al.slice(0,sh));
+  wRoom({phase:"open",round:r,event:eventFor(m,r),turnOrder:ord,turn:0,deadline:Date.now()+TURN(m)*1000,lastOut:[],tally:{},penalty:null});
+}
+function curTurn(){return ROOM&&ROOM.turnOrder?ROOM.turnOrder[ROOM.turn||0]:null}
+function myTurnOk(id){
+  if(!PLAYERS[id]||isOut(id))return false;
+  if(ROOM.phase==="discuss")return true;
+  return ROOM.phase==="open"&&curTurn()===id&&PLAYERS[id].openedRound!==ROOM.round;
 }
 function reveal(cat){
-  const id=myId(),h=myHand();if(!h||!PLAYERS[id]||isOut(id)||!["open","discuss"].includes(ROOM.phase))return;
-  const c=h.cards[cat];if(!c)return;
-  wPlayer(id,{revealed:{[cat]:c.t},openedRound:ROOM.round});
+  const id=myId(),h=myHand();if(!h||!myTurnOk(id))return;
+  const c=h.cards[cat];if(!c||(PLAYERS[id].revealed||{})[cat])return;
+  const wasOpen=ROOM.phase==="open";
+  wPlayer(id,{revealed:{[cat]:c.t},revealedAt:{[cat]:ROOM.round},openedRound:ROOM.round});
+  if(NET.kind==="local"&&wasOpen)advanceTurn();
+}
+function advanceTurn(){
+  const ord=ROOM.turnOrder||[];let t=(ROOM.turn||0)+1;
+  while(t<ord.length&&(isOut(ord[t])||!PLAYERS[ord[t]]))t++;
+  if(t>=ord.length){toDiscuss();return}
+  wRoom({turn:t,deadline:Date.now()+TURN(MODE(ROOM.mode))*1000});
 }
 function castVote(target){
   const id=myId();if(ROOM.phase!=="vote"||isOut(id)||isOut(target)||id===target)return;
@@ -415,6 +441,10 @@ function effects(){
   if(isHost()){
     const n=Object.keys(PLAYERS).length;
     if(ROOM.phase==="lobby"&&ROOM.count!==n)wRoom({count:n});
+    if(ROOM.phase==="open"&&ROOM.turnOrder){
+      const cur=curTurn(),p=PLAYERS[cur];
+      if(!p||isOut(cur)||p.openedRound===ROOM.round){const k=ROOM.round+":"+ROOM.turn;if(ADVKEY!==k){ADVKEY=k;advanceTurn()}}
+    }
     if(ROOM.phase==="vote"){
       const al=alive();
       if(al.length&&al.every(p=>p.voteRound===ROOM.round&&p.vote))tally();
@@ -426,6 +456,7 @@ function effects(){
 const app=$("#app");
 function route(){
   effects();
+  if(NET.kind==="local"&&ROOM&&ROOM.phase==="open"){const k=ROOM.round+":"+(ROOM.turn||0);if(k!==LTURN){LTURN=k;VIEW=curTurn();SHOW=false}}
   let html;
   if(!ADULT)html=gateHtml();
   else if(!ROOM)html=homeHtml();
@@ -463,9 +494,9 @@ function homeHtml(){
   <section class="sec"><div class="sech"><span class="pill">Выбирает ведущий в лобби</span><h2>Режимы игры</h2></div><div class="modes">${MODES.map(m=>`<div class="mode"><h3>${esc(m.name)}</h3><p>${esc(m.desc)}</p><span class="meta">раундов до ${m.rounds} · обсуждение ${m.discuss} с</span></div>`).join("")}</div></section>
   <section class="sec"><div class="sech"><span class="pill">Этапы партии</span><h2>Как играть</h2><p>Партия идёт до 5 раундов. В каждом раунде игроки открывают карты, спорят и голосуют, кого выгнать из бункера.</p></div><div class="steps">
    <div class="step"><b>Карты</b><p>Каждому выдают секретный профиль: профессия, здоровье, багаж, секрет 18+ и ещё пять карт.</p></div>
-   <div class="step"><b>Открытие</b><p>В раунде каждый открывает хотя бы одну карту. В первом раунде принято начинать с профессии.</p></div>
+   <div class="step"><b>Открытие</b><p>Игроки по очереди открывают по одной карте. Всё открытое за круг собирается в отдельной панели.</p></div>
    <div class="step"><b>Обсуждение</b><p>Доказывайте, что вы нужнее остальных, и вскрывайте чужие слабости. Таймер не ждёт.</p></div>
-   <div class="step"><b>Голосование</b><p>Все голосуют тайно. Игрок с наибольшим числом голосов уходит и показывает все карты.</p></div>
+   <div class="step"><b>Голосование</b><p>Голосование открытое: видно, кто за кого. Игрок с наибольшим числом голосов уходит и показывает все карты.</p></div>
    <div class="step"><b>Финал</b><p>Когда мест в бункере столько, сколько осталось игроков, считается итог и оглашается судьба мира.</p></div></div></section>
   <section class="sec"><div class="sech"><span class="pill">Набор 18+</span><h2>Игровые карты</h2></div><div class="stats">
    <span class="stat"><b>${cnt("prof")}</b> профессий</span><span class="stat"><b>${cnt("health")}</b> болезней</span><span class="stat"><b>${cnt("hobby")}</b> хобби</span><span class="stat"><b>${cnt("bag")}</b> предметов багажа</span><span class="stat"><b>${cnt("fact")}</b> фактов</span><span class="stat"><b>${cnt("trait")}</b> характеров</span><span class="stat"><b>${cnt("secret")+cnt("dirty")}</b> секретов 18+</span><span class="stat"><b>${cnt("spec")}</b> особых условий</span><span class="stat"><b>${CATA.length}</b> катастроф</span></div></section>
@@ -504,12 +535,14 @@ function handHtml(){
   if(local&&!VIEW)return `<section class="hand"><h2>Ваши карты</h2>${sel}<p class="note">Выберите игрока, чтобы посмотреть его карты. Остальные в это время отворачиваются.</p></section>`;
   if(!h)return `<section class="hand"><h2>Ваши карты</h2>${sel}<p class="note">Раздаём карты…</p></section>`;
   const show=!local||SHOW;
-  const can=!out&&["open","discuss"].includes(ROOM.phase);
+  const can=!out&&myTurnOk(id);
+  const ct=curTurn(),turnNote=out||ROOM.phase!=="open"?"":can?`<div class="warnbox"><span class="lab">Ваш ход</span><p>Откройте одну карту. Остальные увидят её в панели «Вскрыто в раунде».</p></div>`:`<p class="note">${ct===id?"Вы уже открыли карту в этом раунде.":"Сейчас ход: "+esc((PLAYERS[ct]||{}).nick||"")+". Ждите своей очереди."}</p>`;
   const rv=(PLAYERS[id]&&PLAYERS[id].revealed)||{};
   const trait=MODE(ROOM.mode).traitor&&traitorId()===id;
   const body=show?`<div class="hgrid">${CATS.map(([k,l])=>{const c=h.cards[k],done=!!rv[k];return `<div class="hc${done?" done":""}" data-k="${k}"><span class="lb">${l}</span><span class="tx">${esc(c.t)}</span>${done?`<span class="tag g" style="align-self:flex-start">открыта</span>`:can?`<button class="btn sm" data-a="reveal" data-v="${k}">Открыть</button>`:""}</div>`}).join("")}</div>`:`<p class="note">Карты скрыты. Нажмите «Показать», когда рядом нет посторонних глаз.</p>`;
   return `<section class="hand"><div class="row" style="justify-content:space-between"><h2>Ваши карты${local&&VIEW&&PLAYERS[VIEW]?": "+esc(PLAYERS[VIEW].nick):""}</h2>${local?`<button class="btn ghost sm" data-a="toggleHand">${SHOW?"Скрыть":"Показать"}</button>`:""}</div>${sel}
   ${out?`<p class="note">Вы изгнаны и наблюдаете за игрой. Ваши карты уже открыты всем.</p>`:""}
+  ${turnNote}
   ${trait&&show?`<div class="warnbox red"><span class="lab">Тайная миссия</span><p>Вы Предатель. Доживите до финала и не выдайте себя. Если вы в числе выживших, бункер проиграл.</p></div>`:""}
   ${body}</section>`;
 }
@@ -518,12 +551,27 @@ function votePanel(){
   if(NET.kind==="local"&&!VIEW)return `<section class="panel"><h2>Голосование</h2><p class="note">Выберите в блоке «Ваши карты», кто сейчас голосует.</p></section>`;
   if(!me||isOut(id))return `<section class="panel"><h2>Голосование</h2><p class="note">Изгнанные не голосуют.</p></section>`;
   const cur=me.voteRound===ROOM.round?me.vote:null;
-  return `<section class="panel"><h2>Кого изгнать${NET.kind==="local"?": голосует "+esc(me.nick):""}</h2><div class="vote">${al.filter(p=>p.id!==id).map(p=>`<button class="btn ghost${cur===p.id?" on":""}" data-a="vote" data-v="${esc(p.id)}">${esc(p.nick)}</button>`).join("")}</div><p class="note">Голос можно менять, пока идёт голосование.</p></section>`;
+  return `<section class="panel"><h2>Кого изгнать${NET.kind==="local"?": голосует "+esc(me.nick):""}</h2><div class="vote">${al.filter(p=>p.id!==id).map(p=>`<button class="btn ghost${cur===p.id?" on":""}" data-a="vote" data-v="${esc(p.id)}">${esc(p.nick)}</button>`).join("")}</div><p class="note">Голосование открытое: все видят, кто за кого. Голос можно менять, пока идёт голосование.</p></section>`;
+}
+function votesHtml(){
+  const rows=plist().filter(p=>p.voteRound===ROOM.round&&p.vote&&PLAYERS[p.vote]);
+  const wait=alive().filter(p=>!(p.voteRound===ROOM.round&&p.vote));
+  return (rows.length?`<div class="vlist">${rows.map(p=>`<div class="vrow"><span>${esc(p.nick)}</span><span class="arr">→</span><b>${esc(PLAYERS[p.vote].nick)}</b></div>`).join("")}</div>`:`<p class="note">Пока никто не проголосовал.</p>`)
+    +(ROOM.phase==="vote"&&wait.length?`<p class="note">Ещё думают: ${wait.map(p=>esc(p.nick)).join(", ")}</p>`:"");
+}
+function roundRevealHtml(){
+  const ord=(ROOM.turnOrder||[]).filter(id=>PLAYERS[id]),cur=ROOM.phase==="open"?curTurn():null,ci=ord.indexOf(cur);
+  const items=ord.map((id,i)=>{
+    const p=PLAYERS[id],at=p.revealedAt||{},rv=p.revealed||{},cats=CATS.filter(([k])=>at[k]===ROOM.round&&rv[k]);
+    const st=id===cur?`<span class="tag a">ходит</span>`:cats.length?"":(cur&&i>ci)?`<span class="tag m">ждёт</span>`:`<span class="tag m">пропустил</span>`;
+    return `<div class="rv${id===cur?" now":""}"><div class="rvh"><b>${esc(p.nick)}</b>${st}</div>${cats.map(([k,l])=>`<div class="cell" data-k="${k}"><span class="lb">${l}</span><span class="tx">${esc(rv[k])}</span></div>`).join("")||`<div class="cell"><span class="tx note">${id===cur?"Выбирает карту…":"Ничего не открыто"}</span></div>`}</div>`;
+  }).join("");
+  return `<section class="panel reveal"><div class="row" style="justify-content:space-between"><h2>Вскрыто в раунде ${ROOM.round}</h2><span class="note">в порядке ходов</span></div><div class="rvgrid">${items}</div></section>`;
 }
 function controls(){
   const h=isHost(),ph=ROOM.phase,al=alive();
   let info="",btn="";
-  if(ph==="open"){const n=al.filter(p=>p.openedRound===ROOM.round).length;info=`Открыли карту: ${n} из ${al.length}.`;btn=`<button class="btn" data-a="toDiscuss">К обсуждению</button>`}
+  if(ph==="open"){const ord=ROOM.turnOrder||[],c=PLAYERS[curTurn()];info=`Ход ${(ROOM.turn||0)+1} из ${ord.length}: карту открывает ${c?c.nick:"…"}.`;btn=`<button class="btn ghost" data-a="skip">Пропустить ход</button><button class="btn" data-a="toDiscuss">К обсуждению</button>`}
   if(ph==="discuss"){info="Идёт обсуждение. Убеждайте, обвиняйте, торгуйтесь.";btn=`<button class="btn" data-a="toVote">К голосованию</button>`}
   if(ph==="vote"){const n=al.filter(p=>p.voteRound===ROOM.round&&p.vote).length;info=`Проголосовали: ${n} из ${al.length}.`;btn=`<button class="btn" data-a="tally">Подвести итоги</button>`}
   if(ph==="result"){const fin=ROOM.round>=ROOM.rounds;info="";btn=`<button class="btn" data-a="next">${fin?"К финалу":"Следующий раунд"}</button>`}
@@ -545,6 +593,8 @@ function gameHtml(){
    ${ROOM.deadline&&["open","discuss","vote"].includes(ph)?`<span class="it"><span class="lab">Таймер</span><b id="tm"></b></span>`:""}</div>
   ${ROOM.event&&ph!=="result"?`<div class="warnbox"><span class="lab">Событие раунда</span><p>${esc(ROOM.event)}</p></div>`:""}
   ${controls()}
+  ${roundRevealHtml()}
+  ${ph==="vote"||ph==="result"?`<section class="panel"><h2>${ph==="vote"?"Кто за кого голосует":"Кто за кого проголосовал"}</h2>${votesHtml()}</section>`:""}
   ${res}
   <div class="scen"><section class="panel"><span class="lab">Катастрофа</span><h3>${esc((ROOM.cata||{}).t)}</h3><p class="note">${esc((ROOM.cata||{}).d||"")}</p></section>
    <section class="panel"><span class="lab">Бункер</span><h3>${esc(b.size.t)}, запасов ${esc(b.sup.t)}</h3><ul>${b.feats.map(f=>`<li>${esc(f.t)}</li>`).join("")}<li>Минус: ${esc(b.flaw.t)}</li></ul></section></div>
@@ -621,7 +671,7 @@ const ACT={
   start:startGameFixed,
   reveal,
   vote:castVote,
-  toDiscuss,toVote,tally,next:nextRound,
+  toDiscuss,toVote,tally,next:nextRound,skip(){if(ROOM.phase==="open")advanceTurn()},
   view(v){VIEW=v;SHOW=false;route()},
   toggleHand(){SHOW=!SHOW;route()},
   addLocal(){
@@ -633,7 +683,7 @@ const ACT={
   rm(v){delete PLAYERS[v];route()},
   again(){
     const keep=plist();PLAYERS={};keep.forEach(p=>{PLAYERS[p.id]=newPlayer(p.nick);PLAYERS[p.id].joined=p.joined});
-    HANDS={};VIEW=null;SHOW=false;TALLYKEY="";
+    HANDS={};VIEW=null;SHOW=false;TALLYKEY="";LTURN="";ADVKEY="";
     ROOM=Object.assign(ROOM,{phase:"lobby",round:0,eliminated:[],lastOut:[],tally:{},penalty:null,event:null});route();
   },
   ai:aiFinal
@@ -651,8 +701,8 @@ setInterval(()=>{
   const left=Math.ceil((ROOM.deadline-Date.now())/1000),el=$("#tm");
   if(el){el.textContent=left>0?mmss(left):"время вышло";el.classList.toggle("over",left<=0)}
   if(NET.kind==="online"&&isHost()&&left<-1&&["open","discuss","vote"].includes(ROOM.phase)){
-    const key=ROOM.round+":"+ROOM.phase;
-    if(AUTOKEY!==key){AUTOKEY=key;if(ROOM.phase==="open")toDiscuss();else if(ROOM.phase==="discuss")toVote();else tally()}
+    const key=ROOM.round+":"+ROOM.phase+":"+(ROOM.turn||0);
+    if(AUTOKEY!==key){AUTOKEY=key;if(ROOM.phase==="open"){ADVKEY=ROOM.round+":"+ROOM.turn;advanceTurn()}else if(ROOM.phase==="discuss")toVote();else tally()}
   }
 },500);
 
