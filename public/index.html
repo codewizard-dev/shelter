@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Бункер 18+</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Onest:wght@500;600;700&family=Rubik+Dirt&display=swap">
+<style>
+/* Layout: в духе shelter42 — почти чёрный фон, тёмные карточки с градиентом, оранжевые кнопки, крупные заголовки по центру. Один тёмный образ. */
+:root{
+  --bg:#101010; --card1:#1f1f1f; --card2:#171717; --line:#2c2c2c; --line2:#3a3a3a;
+  --fg:#ffffff; --mute:#9a9a9a; --dim:#5f5f5f; --acc:#ff3500; --acc2:#ff5a2a;
+  --c-prof:#4d9bff; --c-bio:#3ecf6e; --c-health:#ff4d4d; --c-hobby:#ffb020; --c-bag:#b07cff;
+  --c-fact:#22c3d6; --c-trait:#ff7ac4; --c-secret:#ff3500; --c-spec:#e6e6e6;
+  --f-disp:"Onest","Inter",system-ui,sans-serif;
+  --f-body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-logo:"Rubik Dirt","Onest",Impact,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--f-body);
+  padding-block:0 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));min-height:100vh}
+button,input{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--f-disp);font-weight:600;text-wrap:balance;margin:0;letter-spacing:-.01em}
+p{margin:0}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:32px}
+.top{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:16px 0}
+.top>.row{justify-content:flex-end}
+.brand{font-family:var(--f-logo);font-size:28px;letter-spacing:.02em;text-align:center;white-space:nowrap}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:linear-gradient(90deg,var(--card1),var(--card2));border-radius:99px;padding:6px 14px;font-size:13px;font-weight:500;justify-self:start}
+.pills{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.pills .pill{border-radius:6px;padding:6px 10px}
+.hz{display:none}
+.mono{font-variant-numeric:tabular-nums}
+.lab{font:500 12px/1.2 var(--f-body);color:var(--mute)}
+.panel,.mode,.stat,.pubrow,.pl,.band,.hand,.step,.fold,.hc{background:linear-gradient(90deg,var(--card1),var(--card2));border:1px solid var(--line);border-radius:12px}
+.panel{padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grow{flex:1 1 180px;min-width:0}
+.btn{appearance:none;border:1px solid transparent;background:var(--acc);color:#fff;font-weight:500;font-size:15px;padding:11px 20px;border-radius:6px;cursor:pointer}
+.btn:hover{background:var(--acc2)}
+.btn.ghost{background:linear-gradient(90deg,var(--card1),var(--card2));border-color:var(--line);color:var(--fg)}
+.btn.ghost:hover{border-color:var(--line2);background:#222}
+.btn.sm{padding:6px 12px;font-size:13px}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+input[type=text]{background:#141414;border:1px solid var(--line);border-radius:6px;padding:11px 14px;width:100%;min-width:0}
+input[type=text]::placeholder{color:var(--dim)}
+input[type=checkbox]{accent-color:var(--acc)}
+.err{color:#ff7a5c;min-height:1.4em;font-size:14px}
+.note{color:var(--mute);font-size:14px}
+/* hero */
+.hero{position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;gap:22px;padding:72px 0 40px;isolation:isolate}
+.hero::before{content:"";position:absolute;inset:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));z-index:-1;
+  background:radial-gradient(ellipse 60% 55% at 50% 30%,rgba(255,53,0,.16),transparent 70%),radial-gradient(ellipse 80% 70% at 50% 40%,#262626 0%,#101010 70%);
+  -webkit-mask-image:linear-gradient(#000 70%,transparent);mask-image:linear-gradient(#000 70%,transparent)}
+.hero h1{font-size:clamp(44px,8vw,80px);line-height:1.02}
+.hero h1 em{font-style:normal;color:var(--acc)}
+.hero .lead{font-size:17px;color:#d6d6d6;max-width:68ch}
+.hero .panel{width:100%;max-width:560px;text-align:left}
+.sech{text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
+.sech h2{font-size:clamp(30px,5vw,44px)}
+.sech .pill{justify-self:auto}
+.sech p{color:#cfcfcf;max-width:70ch}
+h2{font-size:26px}
+.sec{display:flex;flex-direction:column;gap:16px}
+.modes{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.mode{padding:18px;display:flex;flex-direction:column;gap:8px;text-align:left;min-width:0}
+.mode h3{font-size:19px}
+.mode p{font-size:14px;color:#cfcfcf}
+.mode .meta{font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
+.pick .mode{cursor:pointer;color:var(--fg)}
+.pick .mode:hover{border-color:var(--line2)}
+.pick .mode.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;counter-reset:s}
+.step{padding:20px;counter-increment:s;display:flex;flex-direction:column;gap:10px;min-height:190px}
+.step::before{content:counter(s,decimal-leading-zero);font:600 26px var(--f-disp);color:var(--dim);margin-bottom:auto}
+.step b{font:600 22px/1.15 var(--f-disp);display:block}
+.step p{font-size:14px;color:#cfcfcf}
+.stats{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.stat{padding:8px 14px;font-size:14px;color:var(--mute)}
+.stat b{color:var(--fg);font-weight:600}
+.pubrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px}
+.code{font:700 clamp(40px,10vw,64px)/1 var(--f-disp);letter-spacing:.16em;color:var(--fg)}
+.plist{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.pl{padding:10px 14px;display:flex;justify-content:space-between;gap:8px;align-items:center;min-width:0}
+.pl span{overflow-wrap:anywhere}
+.tag{font:500 11px var(--f-body);border-radius:4px;padding:2px 7px;white-space:nowrap;background:#262626;color:var(--mute)}
+.tag.a{background:var(--acc);color:#fff} .tag.r{background:rgba(255,77,77,.16);color:#ff6b6b} .tag.g{background:rgba(62,207,110,.14);color:#4fdc7c} .tag.m{background:#262626;color:var(--mute)}
+.band{display:flex;gap:10px 26px;flex-wrap:wrap;align-items:center;padding:14px 18px}
+.band .ph{font:600 22px var(--f-disp);color:var(--acc)}
+.band .it{display:flex;flex-direction:column;gap:2px}
+.band .it b{font-weight:600;font-size:16px;font-variant-numeric:tabular-nums}
+#tm.over{color:#ff6b6b}
+.scen{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.scen .panel h3{font-size:20px}
+.scen ul{margin:0;padding-left:18px;color:#cfcfcf;font-size:14px}
+.warnbox{border:1px solid rgba(255,53,0,.5);border-radius:12px;padding:14px 18px;background:rgba(255,53,0,.08);display:flex;flex-direction:column;gap:4px}
+.warnbox .lab{color:var(--acc)}
+.warnbox.red{border-color:rgba(255,77,77,.55);background:rgba(255,77,77,.08)}
+/* карточки игроков */
+.folders{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.fold{position:relative;display:flex;flex-direction:column;min-width:0;padding-bottom:8px;overflow:hidden}
+.fold.me{border-color:var(--acc)}
+.fold.out{opacity:.55}
+.fold header{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;align-items:center}
+.fold header b{font:600 17px var(--f-disp);overflow-wrap:anywhere}
+.cell{padding:6px 14px;display:flex;flex-direction:column;gap:1px;min-width:0}
+.lb{font:500 12px var(--f-body);display:flex;align-items:center;gap:6px}
+.lb::before{content:"";width:7px;height:7px;border-radius:2px;background:currentColor;flex:none}
+[data-k=prof] .lb{color:var(--c-prof)}[data-k=bio] .lb{color:var(--c-bio)}[data-k=health] .lb{color:var(--c-health)}[data-k=hobby] .lb{color:var(--c-hobby)}[data-k=bag] .lb{color:var(--c-bag)}[data-k=fact] .lb{color:var(--c-fact)}[data-k=trait] .lb{color:var(--c-trait)}[data-k=secret] .lb{color:var(--c-secret)}[data-k=spec] .lb{color:var(--c-spec)}
+.cell .tx{font-size:14px;line-height:1.35;overflow-wrap:anywhere}
+.cell.shut .tx{color:transparent;background:#262626;height:10px;margin-top:5px;border-radius:3px;width:70%;user-select:none}
+.cell.late .tx{color:#bdbdbd}
+.stamp{position:absolute;right:12px;top:52px;transform:rotate(-10deg);border:2px solid #ff4d4d;color:#ff4d4d;font:700 18px var(--f-disp);padding:0 8px;border-radius:4px;letter-spacing:.06em;pointer-events:none}
+.votes{font-size:12px;color:var(--mute);padding:6px 14px 0}
+/* свои карты */
+.hand{padding:20px;display:flex;flex-direction:column;gap:14px;border-color:rgba(255,53,0,.45)}
+.hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.hc{background:#151515;padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.hc.done{opacity:.5}
+.hc .tx{font-size:15px;line-height:1.35;overflow-wrap:anywhere;font-weight:500}
+.hc .btn{align-self:flex-start}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{appearance:none;background:#1a1a1a;border:1px solid var(--line);border-radius:99px;padding:5px 13px;cursor:pointer;font-size:14px}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.vote{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.vote .btn{text-align:left}
+.vote .btn.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.bar{height:6px;background:#262626;border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc);border-radius:3px}
+.verdict h2{font-size:clamp(28px,6vw,44px)}
+.verdict p{max-width:72ch;color:#e3e3e3}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#232323;border:1px solid var(--line2);color:#fff;padding:10px 16px;border-radius:8px;max-width:90vw;z-index:50;font-size:14px}
+.gate{min-height:80vh;display:flex;align-items:center;justify-content:center}
+.gate .panel{max-width:520px;text-align:center;align-items:center;padding:32px}
+.gate h1{font:400 clamp(64px,18vw,120px)/1 var(--f-logo);color:var(--acc)}
+footer{color:var(--mute);font-size:13px;display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:1px solid var(--line);text-align:center}
+@media(max-width:600px){.top{grid-template-columns:1fr auto}.top>.pill{display:none}.brand{font-size:22px;text-align:left}}
+@media(prefers-reduced-motion:no-preference){.btn,.chip,.mode{transition:background .15s,border-color .15s}}
+</style>
+
+<div id="app"></div>
+
+<script>
+"use strict";
+/* ───────── данные ───────── */
+const CATS=[["prof","Профессия"],["bio","Биология"],["health","Здоровье"],["hobby","Хобби"],["bag","Багаж"],["fact","Факт"],["trait","Характер"],["secret","Секрет 18+"],["spec","Особое условие"]];
+const CATL=Object.fromEntries(CATS);
+
+const MODES=[
+ {id:"classic",name:"Классика 18+",desc:"Обычный «Бункер», но карты с перцем: пошлые профессии, неловкие секреты, чёрный юмор.",rounds:5,open:60,discuss:120,vote:45},
+ {id:"eden",name:"Новый Эдем",desc:"Задача выживших заселить планету. Возраст и плодовитость решают всё: без пары мужчины и женщины человечество вымрет.",rounds:5,open:60,discuss:120,vote:45,eden:true},
+ {id:"drunk",name:"Пьяный бункер",desc:"После каждого голосования штрафы. Играйте с напитками, но можно и с соком: правила те же. Пейте ответственно.",rounds:5,open:60,discuss:100,vote:45,drink:true},
+ {id:"dirty",name:"Грязные секреты",desc:"Расширенный набор карт «Секрет 18+». Со второго раунда все обязаны открывать по секрету.",rounds:5,open:60,discuss:120,vote:45,dirty:true},
+ {id:"chaos",name:"Хаос",desc:"В начале каждого раунда выпадает событие, которое ломает привычные правила обсуждения.",rounds:5,open:60,discuss:100,vote:45,events:true},
+ {id:"traitor",name:"Предатель",desc:"Один из вас получил тайную миссию. Если Предатель дожил до финала, бункер проиграл. Кто это, вы узнаете в конце.",rounds:5,open:60,discuss:120,vote:45,traitor:true},
+ {id:"blitz",name:"Блиц",desc:"Три раунда и короткие таймеры. Партия на 15 минут, когда нет времени на долгие споры.",rounds:3,open:30,discuss:60,vote:30}
+];
+const MODE=id=>MODES.find(m=>m.id===id)||MODES[0];
+
+/* Формат: "текст|оценка полезности". {м|ж} подставляет окончание по полу. */
+const POOL={
+prof:["Хирург|3","Инженер-атомщик|3","Фермер|3","Повар|2","Электрик|2","Сантехник|2","Врач-реаниматолог|3","Военный сапёр|2","Священник|0","Блогер-миллионник|-2","Стриптизёр|-1","Сексолог|1","Тату-мастер|0","Бармен|1","Спасатель МЧС|3","Дальнобойщик|1","Бухгалтер|0","Акушер-гинеколог|3","Диджей|-1","Юрист по разводам|-1","Психолог|2","Охранник ночного клуба|1","Продавец в секс-шопе|0","Актёр взрослого кино на пенсии|-1","Курьер доставки|0","Самогонщик|2","Агроном|3","Слесарь|2","Кальянщик|-1","Астролог|-2","Менеджер по продажам|-1","Охотник|3","Ветеринар|2","Пекарь|2","Учитель ОБЖ|2","Продавец вейпов|-1","Фитнес-тренер|1","Массажист|1","Хирург-пластик|1","Таксидермист|0"],
+health:["Идеально здоров|3","Аллергия на пыль|-1","Бессонница|-1","Хроническое похмелье|-1","Астма|-2","Диабет 1 типа|-2","Паническая атака в тёмных помещениях|-2","Железное здоровье, но курит по пачке в день|1","Лёгкая клаустрофобия|-2","Сидячий образ жизни и одышка|-1","Аллергия на латекс|0","Дрожь в руках|-1","Ожирение 2 степени|-1","Бодибилдер на стероидах|1","Анемия|-1","Зависимость от энергетиков|-1","Скрытый алкоголизм|-2","Герпес на губе|0","Крепкий иммунитет|2","Сломан мизинец|0","Непереносимость лактозы|-1","Дальтонизм|0","Плоскостопие|-1","Метеоризм в тяжёлой форме|-1","Железный желудок|2","Хроническая бессонница после развода|-1"],
+hobby:["Выживание в лесу|3","Шитьё и вязание|1","Компьютерные игры|-1","Пикап и знакомства|0","Рыбалка|2","Домашнее пивоварение|2","Разведение кактусов|0","Стендап|1","Коллекционирует чужие носки|-2","Стрельба из лука|2","Фанфики 18+|-1","Игра на гитаре|1","Йога|1","Алхимия на кухне|1","Косплей|0","Охота за привидениями|-1","Танцы на пилоне|0","Садоводство|2","Радиолюбитель|3","Азартные игры|-1","Готовка на костре|2","ASMR-стримы|-1","Шахматы|1","Свидания по приложениям|-1"],
+bag:["Ящик тушёнки|3","Бензопила|2","Набор для выживания|3","Ящик виски|1","Надувная кукла|-1","Гитара|0","Армейская аптечка|3","Приставка и 12 игр|-1","Мешок семян картофеля|3","Бензиновый генератор|3","Чемодан презервативов|1","Зажигалка Zippo|1","Кот в переноске|1","Рация|2","Лук и 40 стрел|2","Сундук со свечами и благовониями|0","Набор для БДСМ-игр|-1","Вибратор на солнечной батарее|0","Ящик шоколада|1","Энциклопедия съедобных растений|2","Набор инструментов|3","Фильтр для воды|3","Дрон с камерой|1","Электрогитара без усилителя|-2","Мешок сухих дрожжей|2"],
+fact:["Знает пять языков|1","Сидел за драку|-1","Прошёл три развода|-1","Говорит, что умеет колдовать|-1","Бывший военный|2","Пишет эротику под псевдонимом|-1","Служил в спецназе|3","Находил клады|1","Состоит в секте|-2","Выиграл{|а} в лотерею и всё потратил{|а}|-1","Никогда не врёт и этим бесит|0","Умеет водить танк|2","Много лет жил{|а} в тайге|3","Был{|а} в любовном треугольнике с начальником и его женой|-1","Был{|а} замешан{|а} в громком скандале|-1","Бывший хиппи|0","Храпит как трактор|-2","Гонит самогон из чего угодно|2","Ведёт тайный дневник про всех вокруг|-1","Знает, где находится второй бункер|2"],
+trait:["Лидер|2","Нытик|-2","Параноик|-1","Весельчак|1","Манипулятор|0","Альтруист|2","Ленивый|-2","Агрессивный|-1","Занудный|-1","Токсичный|-2","Обаятельный лжец|0","Хладнокровный|2","Заводит романы везде|-1","Скандалист|-2","Говорит гадости с улыбкой|-1","Самоирония|1","Трудоголик|2","Душа компании|1","Стукач|-1","Терпеливый|2"],
+secret:["Однажды переспал{|а} с начальником ради повышения|0","Снимал{ся|ась} в откровенной рекламе|-1","Хранит чемодан сомнительных костюмов|-1","Пробовал{|а} всё, кроме трезвой жизни|-1","Тайный фетиш на униформу|0","Состоит в клубе знакомств для взрослых|-1","Бывший любовник сидит в соседнем бункере|0","Три раза в неделю смотрит кино для взрослых|-1","Встречал{ся|ась} с двумя сразу и обоим врал{|а}|-1","Уверен{|а}, что лучше всех целуется|0","Знает, как расслабить кого угодно за пять минут|1","Пьяным признаётся всем в любви|-1","Спит голым и не стесняется|-1","Ведёт список бывших, он уже в трёх томах|-1","Организовывал{|а} закрытые вечеринки|0","Тайно торгует алкоголем|1","Читает чужие переписки|-2","Лишил{ся|ась} девственности в шкафу у бабушки|0"],
+dirty:["Однажды перепутал{|а} имя в самый неподходящий момент|-1","Умеет делать массаж с приятным продолжением|1","Состоял{|а} в клубе нудистов, вылетел{|а} за приставания|-2","Носит под одеждой то, что лучше не показывать|0","Тайно влюблён{|а} в одного из игроков|0","Знает все слабые места любого мужчины и женщины|1","Был{|а} уволен{|а} за пикантные фото на рабочем столе|-1","Однажды в лифте застрял{|а} с бывшим и его новой|-1","Мастер{|ица} флирта: добивается чего угодно улыбкой|1","Коллекционирует трофейные сувениры от любовников|-1"],
+spec:["Можешь поменяться одной открытой картой с любым игроком. Согласуйте вслух.|0","В ближайшем голосовании твой голос считается за два.|0","Назначь игрока, который обязан открыть карту прямо сейчас.|0","Игрок справа не может голосовать против тебя в этом раунде.|0","Скажи тост. Все поднимают стаканы (или кружки).|0","Заставь одного игрока открыть карту «Секрет 18+».|0","Защити любого игрока: его голоса в этом раунде делятся пополам.|0","Задай прямой вопрос любому игроку. Он обязан ответить честно.|0","Отмени одно своё открытие: закрой карту обратно, если успеешь убедить остальных.|0","Верни в бункер изгнанного игрока, если большинство согласится.|0"]
+};
+const CATA=["Ядерная зима|Города сгорели, небо закрыто пеплом. Холод и радиация надолго.|3","Вирус Z-18|Заражённые теряют рассудок и тягу к приличиям. Улицы вне закона.|3","Падение астероида|Огромный камень ударил в океан. Цунами смыли побережья.|2","Супервулкан|Йеллоустоун проснулся. Пепел покрыл континенты, урожаев не будет годами.|3","Восстание ИИ|Умные дома, дроны и кофеварки объединились против людей.|3","Эпидемия бесплодия|Рождаемость упала почти до нуля. Каждая плодовитая пара на вес золота.|2","Всемирный потоп|Уровень океана поднялся на 80 метров. Суши почти нет.|2","Нашествие пчёл-убийц|Мутировавшие пчёлы гонят людей под землю. Мёд теперь валюта.|1","Грибы-паразиты|Споры превращают людей в послушных кормильцев грибницы.|3","Магнитная буря|Вся электроника мертва. Остались только книги и самогонные аппараты.|2","Пришельцы-гурманы|Инопланетяне решили, что человечина с перцем лучший деликатес.|3","Бог ушёл в отпуск|Законы физики дают сбои. Иногда падает вверх, иногда кончается пиво.|1"];
+const BUN_SIZE=["120 м²|-1","300 м²|0","800 м²|1","2000 м²|2"];
+const BUN_SUP=["на 3 месяца|-2","на 1 год|0","на 5 лет|2"];
+const BUN_FEAT=["Оранжерея|2","Мини-бар с большим запасом алкоголя|0","Спортзал|1","Медблок|2","Мастерская|2","Библиотека|1","Кинозал|0","Оружейная|1","Сауна|0","Комната релаксации с круглой кроватью|0","Дискотека с неоновой подсветкой|0","Лаборатория|2","Водяная скважина|3","Склад презервативов и смазок|0"];
+const BUN_FLAW=["Течёт крыша|-1","Нет вентиляции в северном крыле|-2","Единственный туалет на всех|-1","Крысы размером с кошек|-1","Генератор шумит как трактор|-1","Всего одна двуспальная кровать|-1","Стены очень тонкие, слышно всё|-1"];
+const EVENTS=["Обсуждайте только вопросами. Утверждение стоит глотка воды.","Нельзя говорить слово «я». Ошибся: молчишь до конца обсуждения.","Все говорят шёпотом, кроме того, кто открыл карту последним.","Голос самого младшего игрока считается за два.","Каждый должен сказать комплимент тому, за кого собирается голосовать.","Сплетни о других игроках приветствуются, враньё тоже.","Разговор идёт только в третьем лице, будто вы обсуждаете чужую жизнь.","Игрок, открывший карту первым, лишается голоса в обсуждении.","Каждый называет одного, кого точно не изгонит, и объясняет почему."];
+const PENALTY=["Изгнанный пьёт до дна.","Проголосовавшие против изгнанного делают по глотку.","Кто открыл самую нелепую карту раунда, пьёт.","Все, у кого есть питомец, пьют.","Кто последним указал на изгнанного, пьёт.","Все, кто хоть раз был в стриптиз-клубе, пьют.","Каждый рассказывает неловкую историю. Самая слабая стоит глотка.","Пьёт самый трезвый на вид.","Все, кто сейчас не в отношениях, пьют."];
+const FLAVOR=["Первую ночь отпраздновали тем, что нашли в баре заначку и пересчитали друг друга по голосам.","Спустя месяц выяснилось, что стены тоньше, чем обещал каталог, и тайн больше не осталось.","Генератор чихал, но все сошлись на том, что это лучшее, что случилось с их личной жизнью.","На третью неделю состоялась первая свадьба и первое голосование о разводе.","Решение об очереди в душ принималось тайным голосованием и обидами на годы."];
+
+/* ───────── утилиты ───────── */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pick=(a,r=Math.random)=>a[Math.floor(r()*a.length)];
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function rng(seed){let a=hash(String(seed));return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function card(s,g){const i=s.lastIndexOf("|");const t=s.slice(0,i).replace(/\{([^|}]*)\|([^}]*)\}/g,(m,a,b)=>g==="ж"?b:a);return{t,s:+s.slice(i+1)}}
+const yw=n=>(n%10===1&&n%100!==11)?"год":([2,3,4].includes(n%10)&&![12,13,14].includes(n%100))?"года":"лет";
+const mmss=s=>Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3500)}
+function merge(t,s){for(const k in s){if(s[k]&&typeof s[k]==="object"&&!Array.isArray(s[k])){t[k]=t[k]||{};merge(t[k],s[k])}else t[k]=s[k]}}
+const genCode=()=>{const a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let c="";for(let i=0;i<5;i++)c+=a[Math.floor(Math.random()*a.length)];return c};
+
+/* ───────── генерация ───────── */
+function genHand(modeId){
+  const m=MODE(modeId);const male=Math.random()<.5,g=male?"м":"ж";
+  const age=18+Math.floor(Math.pow(Math.random(),1.25)*58);
+  const build=pick([["худощавый","худощавая"],["крепкий","крепкая"],["полный","полная"],["атлетичный","атлетичная"],["низкорослый","низкорослая"],["очень высокий","очень высокая"]])[male?0:1];
+  const fertile=Math.random()>.2&&!(!male&&age>50);
+  const bt=(male?"Мужчина":"Женщина")+", "+age+" "+yw(age)+", "+build+(fertile?(m.eden?", способен"+(male?"":"на")+" к деторождению":""):", бесплодн"+(male?"ый":"ая"));
+  const cards={bio:{t:bt,s:age<=35?2:age<=50?1:age<=65?0:-2,f:fertile,g:g}};
+  ["prof","health","hobby","bag","fact","trait","spec"].forEach(k=>cards[k]=card(pick(POOL[k]),g));
+  const sec=m.dirty?POOL.secret.concat(POOL.dirty,POOL.dirty):POOL.secret;
+  cards.secret=card(pick(sec),g);
+  return{cards};
+}
+function genBunker(){
+  const feats=[];while(feats.length<3){const f=pick(BUN_FEAT);if(!feats.includes(f))feats.push(f)}
+  return{size:card(pick(BUN_SIZE),"м"),sup:card(pick(BUN_SUP),"м"),feats:feats.map(f=>card(f,"м")),flaw:card(pick(BUN_FLAW),"м")};
+}
+
+/* ───────── состояние ───────── */
+const KEY="b18";
+let ADULT=false;try{ADULT=sessionStorage.getItem(KEY)==="1"}catch(e){}
+let K={db:null,user:null,sample:null,uid:null,me:null,canWrite:null,ready:false};
+const NET={kind:null,code:null,unsubs:[]};
+let ROOM=null,PLAYERS={},HAND=null,HAND_LOADED=false,HANDS={},VIEW=null,SHOW=false,SENTFULL=false,HANDBUSY=false,LAST="",AUTOKEY="",TALLYKEY="",PUBUNSUB=null,PUB=[];
+const SAVED={nick:""};try{SAVED.nick=localStorage.getItem("b18nick")||""}catch(e){}
+const myId=()=>NET.kind==="local"?VIEW:K.uid;
+const plist=()=>Object.entries(PLAYERS).map(([id,p])=>Object.assign({id},p)).sort((a,b)=>(a.joined-b.joined)||(a.id<b.id?-1:1));
+const isOut=id=>(ROOM.eliminated||[]).includes(id);
+const alive=()=>plist().filter(p=>!isOut(p.id));
+const isHost=()=>NET.kind==="local"||(ROOM&&ROOM.host===K.uid);
+const myHand=()=>NET.kind==="local"?HANDS[VIEW]:HAND;
+function traitorId(){if(!ROOM||!ROOM.seed)return null;const ids=Object.keys(PLAYERS);if(!ids.length)return null;return ids.sort((a,b)=>hash(ROOM.seed+a)-hash(ROOM.seed+b))[0]}
+
+/* ───────── запись ───────── */
+const Q={};
+function qw(key,fn){const p=(Q[key]||Promise.resolve()).then(fn).catch(e=>{toast("Не удалось сохранить: "+((e&&(e.message||e.code))||"ошибка"))});Q[key]=p;return p}
+function wRoom(p){if(NET.kind==="local"){Object.assign(ROOM,p);route();return Promise.resolve()}return qw("r",()=>K.db.doc("rooms/"+NET.code).update(p))}
+function wPlayer(id,p){if(NET.kind==="local"){merge(PLAYERS[id],p);route();return Promise.resolve()}return qw("p"+id,()=>K.db.doc("rooms/"+NET.code+"/players/"+id).update(p))}
+const newPlayer=nick=>({nick,joined:Date.now(),revealed:{},vote:null,voteRound:0,openedRound:0});
+
+/* ───────── подключение ───────── */
+/* ───────── связь с собственным сервером (server.js) ───────── */
+function serverDb(){
+  return new Promise((resolve,reject)=>{
+    let token;try{token=localStorage.getItem("b18tok")}catch(e){}
+    if(!token){token=(crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now().toString(36))+"x";try{localStorage.setItem("b18tok",token)}catch(e){}}
+    let cid=null,uid=null,first=true,n=0;const subs={};
+    const call=(op,o)=>fetch("api",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({op,cid,token},o))})
+      .then(r=>r.json()).then(r=>{if(!r.ok)throw{code:r.err,message:r.err};return r.data});
+    const mk=d=>({id:d.id,exists:d.exists,data:()=>d.data||undefined,metadata:{fromCache:false,hasPendingWrites:false}});
+    function sub(spec,cb,err){const sid="s"+(++n);subs[sid]={spec,cb};if(cid)call("sub",{sid,spec}).catch(e=>err&&err(e));
+      return()=>{delete subs[sid];if(cid)call("unsub",{sid}).catch(()=>{})}}
+    const es=new EventSource("events?token="+encodeURIComponent(token));
+    const timer=setTimeout(()=>{if(first){first=false;es.close();reject(new Error("no server"))}},6000);
+    es.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}
+      if(m.t==="welcome"){cid=m.cid;uid=m.uid;for(const sid in subs)call("sub",{sid,spec:subs[sid].spec}).catch(()=>{});
+        if(first){first=false;clearTimeout(timer);resolve(api)}}
+      else if(m.t==="snap"&&subs[m.sid]){const s=subs[m.sid];s.cb(m.docs?{docs:m.docs.map(mk),size:m.docs.length,empty:!m.docs.length}:mk(m.doc))}};
+    es.onerror=()=>{if(first){first=false;clearTimeout(timer);es.close();reject(new Error("no server"))}};
+    const doc=path=>({path,id:path.split("/").pop(),
+      get:()=>call("get",{path}).then(mk),set:data=>call("set",{path,data}),update:data=>call("update",{path,data}),delete:()=>call("del",{path}),
+      onSnapshot:(cb,err)=>sub({k:"doc",path},cb,err)});
+    const col=(path,f)=>({path,doc:id=>doc(path+"/"+id),
+      where:(a,op,v)=>col(path,Object.assign({},f,{where:[a,op,v]})),limit:l=>col(path,Object.assign({},f,{limit:l})),
+      onSnapshot:(cb,err)=>sub(Object.assign({k:"col",path},f),cb,err)});
+    const api={uid:()=>uid,doc,collection:p=>col(p,{})};
+  });
+}
+async function initCaps(){
+  try{
+    if(window.claude&&window.claude.use){
+      const[db,user,sample]=await Promise.all([window.claude.use("db"),window.claude.use("user"),window.claude.use("sample")]);
+      K.db=db;K.user=user;K.sample=sample;
+      if(user){K.uid=await user.id();K.me=await user.me();K.canWrite=await user.can("data.write")}
+    }else if(/^https?:$/.test(location.protocol)){const d=await serverDb();K.db=d;K.uid=d.uid();K.canWrite=true;K.via="server"}
+  }catch(e){console.warn(e)}
+  K.ready=true;
+  if(!ROOM)route();
+  watchPublic();
+}
+function watchPublic(){
+  if(!K.db||!K.uid||PUBUNSUB)return;
+  try{
+    PUBUNSUB=K.db.collection("rooms").where("phase","==","lobby").limit(30).onSnapshot(q=>{
+      const lim=Date.now()-3*3600*1000;
+      PUB=q.docs.map(d=>d.data()).filter(r=>r.public&&r.created>lim);
+      const el=$("#pub");if(el)el.innerHTML=pubHtml();
+    },()=>{});
+  }catch(e){}
+}
+function unsubAll(){NET.unsubs.forEach(u=>{try{u()}catch(e){}});NET.unsubs=[]}
+function resetGame(){unsubAll();ROOM=null;PLAYERS={};HAND=null;HAND_LOADED=false;HANDS={};VIEW=null;SHOW=false;SENTFULL=false;HANDBUSY=false;NET.kind=null;NET.code=null;LAST="";AUTOKEY="";TALLYKEY=""}
+function subscribe(code){
+  NET.kind="online";NET.code=code;
+  const db=K.db;
+  NET.unsubs.push(db.doc("rooms/"+code).onSnapshot(s=>{
+    if(!s.exists){leave("Комната закрыта или не найдена.");return}
+    ROOM=s.data();route();
+  },e=>leave("Нет доступа к комнате: "+(e.message||e.code))));
+  NET.unsubs.push(db.collection("rooms/"+code+"/players").onSnapshot(q=>{
+    PLAYERS={};q.docs.forEach(d=>PLAYERS[d.id]=d.data());route();
+  },e=>toast("Ошибка списка игроков")));
+  NET.unsubs.push(db.doc("data/users/"+K.uid+"/hand_"+code).onSnapshot(s=>{
+    HAND=s.exists?s.data():null;HAND_LOADED=true;route();
+  },e=>{HAND_LOADED=true}));
+}
+function leave(msg){resetGame();route();if(msg)setTimeout(()=>setErr(msg),50)}
+function setErr(m){const e=$("#err");if(e)e.textContent=m||""}
+function readNick(){
+  const el=$("#nick");let n=(el&&el.value||"").trim().slice(0,16);
+  if(!n){setErr("Введите позывной.");return null}
+  try{localStorage.setItem("b18nick",n)}catch(e){}
+  return n;
+}
+async function createRoom(){
+  const nick=readNick();if(!nick)return;
+  if(!K.db||!K.uid){setErr("Онлайн-режим недоступен: нет связи с игровым сервером.");return}
+  setErr("Создаём комнату…");
+  try{
+    let code,tries=0;
+    do{code=genCode();const s=await K.db.doc("rooms/"+code).get();if(!s.exists)break}while(++tries<6);
+    const pub=!!($("#pubchk")&&$("#pubchk").checked);
+    await K.db.doc("rooms/"+code).set({code,host:K.uid,mode:"classic",phase:"lobby",public:pub,round:0,rounds:0,seats:0,eliminated:[],deadline:null,created:Date.now(),count:1,seed:""});
+    await K.db.doc("rooms/"+code+"/players/"+K.uid).set(newPlayer(nick));
+    subscribe(code);
+  }catch(e){setErr(writeErr(e))}
+}
+function writeErr(e){
+  if(e&&e.code==="invalid_argument"&&K.via!=="server")return "Нет прав на запись. Владелец страницы должен выдать вам доступ «Участник» (Contributor).";
+  return "Ошибка: "+((e&&(e.message||e.code))||"неизвестная");
+}
+async function joinRoom(codeIn){
+  const nick=readNick();if(!nick)return;
+  const code=(codeIn||($("#code")&&$("#code").value)||"").trim().toUpperCase();
+  if(code.length<4){setErr("Введите код комнаты.");return}
+  if(!K.db||!K.uid){setErr("Онлайн-режим недоступен: нет связи с игровым сервером.");return}
+  setErr("Подключаемся…");
+  try{
+    const s=await K.db.doc("rooms/"+code).get();
+    if(!s.exists){setErr("Комната с таким кодом не найдена.");return}
+    const r=s.data();
+    const ex=await K.db.doc("rooms/"+code+"/players/"+K.uid).get();
+    if(!ex.exists){
+      if(r.phase!=="lobby"){setErr("Игра уже началась.");return}
+      await K.db.doc("rooms/"+code+"/players/"+K.uid).set(newPlayer(nick));
+    }
+    subscribe(code);
+  }catch(e){setErr(writeErr(e))}
+}
+function startLocal(){
+  resetGame();NET.kind="local";
+  ROOM={code:"LOCAL",host:"local",mode:"classic",phase:"lobby",public:false,round:0,rounds:0,seats:0,eliminated:[],deadline:null,created:Date.now(),count:0,seed:""};
+  PLAYERS={};route();
+}
+
+/* ───────── ход игры ───────── */
+function eventFor(m,round){
+  if(m.events)return pick(EVENTS);
+  if(m.dirty&&round>=2)return "В этом раунде каждый обязан открыть карту «Секрет 18+», если она ещё закрыта.";
+  return null;
+}
+function startGameFixed(){
+  const c=pick(CATA).split("|");
+  const ps=plist();if(ps.length<3){toast("Нужно минимум 3 игрока.");return}
+  const m=MODE(ROOM.mode),n=ps.length,seats=Math.ceil(n/2),k=n-seats;
+  const R=Math.max(1,Math.min(k,m.rounds)),base=Math.floor(k/R),extra=k%R,plan=[];
+  for(let i=0;i<R;i++)plan.push(base+(i<extra?1:0));
+  if(NET.kind==="local")ps.forEach(p=>{HANDS[p.id]=genHand(ROOM.mode);});
+  wRoom({phase:"open",round:1,rounds:R,plan,seats,eliminated:[],seed:Math.random().toString(36).slice(2,10),
+    cata:{t:c[0],d:c[1],h:+c[2]},bunker:genBunker(),event:eventFor(m,1),deadline:Date.now()+m.open*1000,lastOut:[],tally:{},penalty:null});
+}
+function toDiscuss(){wRoom({phase:"discuss",deadline:Date.now()+MODE(ROOM.mode).discuss*1000})}
+function toVote(){wRoom({phase:"vote",deadline:Date.now()+MODE(ROOM.mode).vote*1000})}
+function tally(){
+  const key=ROOM.round+":"+ROOM.phase;if(TALLYKEY===key)return;TALLYKEY=key;
+  const al=alive().map(p=>p.id),cnt={};al.forEach(id=>cnt[id]=0);
+  plist().forEach(p=>{if(al.includes(p.id)&&p.voteRound===ROOM.round&&p.vote&&cnt[p.vote]!==undefined)cnt[p.vote]++});
+  const kick=(ROOM.plan||[])[ROOM.round-1]||1;
+  const out=al.map(id=>({id,c:cnt[id],r:Math.random()})).sort((a,b)=>b.c-a.c||a.r-b.r).slice(0,Math.min(kick,al.length-1)).map(o=>o.id);
+  const m=MODE(ROOM.mode);
+  if(NET.kind==="local")out.forEach(id=>{PLAYERS[id].full=HANDS[id].cards});
+  wRoom({phase:"result",eliminated:(ROOM.eliminated||[]).concat(out),lastOut:out,tally:cnt,penalty:m.drink?pick(PENALTY):null,deadline:null});
+}
+function nextRound(){
+  const m=MODE(ROOM.mode);
+  if(ROOM.round>=ROOM.rounds||alive().length<=ROOM.seats){
+    if(NET.kind==="local")alive().forEach(p=>{PLAYERS[p.id].full=HANDS[p.id].cards});
+    wRoom({phase:"final",deadline:null});return;
+  }
+  const r=ROOM.round+1;
+  wRoom({phase:"open",round:r,event:eventFor(m,r),deadline:Date.now()+m.open*1000,lastOut:[],tally:{},penalty:null});
+}
+function reveal(cat){
+  const id=myId(),h=myHand();if(!h||!PLAYERS[id]||isOut(id)||!["open","discuss"].includes(ROOM.phase))return;
+  const c=h.cards[cat];if(!c)return;
+  wPlayer(id,{revealed:{[cat]:c.t},openedRound:ROOM.round});
+}
+function castVote(target){
+  const id=myId();if(ROOM.phase!=="vote"||isOut(id)||isOut(target)||id===target)return;
+  wPlayer(id,{vote:target,voteRound:ROOM.round});
+}
+
+/* ───────── побочные эффекты после обновления данных ───────── */
+function effects(){
+  if(!ROOM||NET.kind!=="online")return;
+  const me=K.uid;
+  // руку создаёт сам игрок после старта (она приватная)
+  if(ROOM.phase!=="lobby"&&HAND_LOADED&&!HAND&&!HANDBUSY&&PLAYERS[me]){
+    HANDBUSY=true;
+    const h=genHand(ROOM.mode);
+    qw("hand",()=>K.db.doc("data/users/"+me+"/hand_"+NET.code).set(h)).then(()=>{HANDBUSY=false});
+  }
+  // изгнанные и выжившие в финале открывают всё
+  if(HAND&&PLAYERS[me]&&!PLAYERS[me].full&&!SENTFULL&&(isOut(me)||ROOM.phase==="final")){
+    SENTFULL=true;wPlayer(me,{full:HAND.cards});
+  }
+  if(isHost()){
+    const n=Object.keys(PLAYERS).length;
+    if(ROOM.phase==="lobby"&&ROOM.count!==n)wRoom({count:n});
+    if(ROOM.phase==="vote"){
+      const al=alive();
+      if(al.length&&al.every(p=>p.voteRound===ROOM.round&&p.vote))tally();
+    }
+  }
+}
+
+/* ───────── экраны ───────── */
+const app=$("#app");
+function route(){
+  effects();
+  let html;
+  if(!ADULT)html=gateHtml();
+  else if(!ROOM)html=homeHtml();
+  else if(ROOM.phase==="lobby")html=lobbyHtml();
+  else if(ROOM.phase==="final")html=finalHtml();
+  else html=gameHtml();
+  if(html===LAST)return;
+  LAST=html;app.innerHTML=html;
+  if(NET.kind==="local"&&ROOM&&ROOM.phase==="lobby"){const i=$("#lname");if(i)i.focus()}
+  if(!ROOM)watchPublic();
+}
+const header=(extra)=>`<div class="top"><span class="pill">18+</span><div class="brand">БУНКЕР 18+</div><div class="row">${extra||""}</div></div>`;
+
+function gateHtml(){return `<div class="gate"><div class="panel"><h1>18+</h1><h2>Только для взрослых</h2><p class="note">В картах есть пошлый юмор, алкоголь, чёрные шутки и взрослые темы. Продолжая, вы подтверждаете, что вам исполнилось 18 лет.</p><div class="row"><button class="btn" data-a="adult">Мне есть 18</button><button class="btn ghost" data-a="notadult">Мне нет 18</button></div><p class="err" id="err"></p></div></div>`}
+
+function pubHtml(){
+  if(!K.db||!K.uid)return `<p class="note">Список открытых комнат появится, когда страница подключится к хранилищу.</p>`;
+  if(!PUB.length)return `<p class="note">Открытых комнат пока нет. Создайте свою и отметьте «Открытая комната», тогда она появится здесь у всех.</p>`;
+  return PUB.map(r=>`<div class="pubrow"><div><b class="mono">${esc(r.code)}</b> <span class="note">· ${esc(MODE(r.mode).name)} · игроков: ${r.count||1}</span></div><button class="btn sm" data-a="joinCode" data-v="${esc(r.code)}">Войти</button></div>`).join("");
+}
+function homeHtml(){
+  const online=K.db&&K.uid;
+  const cnt=k=>POOL[k].length;
+  const note=!K.ready?"Подключаемся к хранилищу…":online?(K.via==="server"?"Онлайн-режим работает. Отправьте друзьям ссылку на сайт и код комнаты.":K.canWrite===false?"У вас доступ только для чтения. Попросите владельца страницы выдать доступ «Участник», иначе онлайн-игра не сработает.":"Онлайн-режим работает. Друзьям нужен доступ «Участник» к этой странице и вход в аккаунт."):"Онлайн-режим недоступен: сайт открыт без игрового сервера. Запустите server.js по инструкции из архива. Игра за одним устройством работает всегда.";
+  return header()+`<div class="wrap">
+  <section class="hero"><div class="pills"><span class="pill">18+</span><span class="pill">Бесплатная браузерная игра</span></div><h1>Бункер <em>18+</em></h1>
+  <p class="lead">Конец света наступил, мест в убежище хватит только половине. Раскрывайте карты, защищайте себя, топите соседей и голосуйте. Всё как в настольной игре, только с матом в подтексте, алкоголем и грязными секретами.</p>
+  <div class="panel"><label class="lab" for="nick">Позывной</label><input type="text" id="nick" maxlength="16" autocomplete="off" placeholder="Как вас называть в бункере" value="${esc(SAVED.nick||(K.me&&K.me.name)||"")}">
+  <div class="row"><button class="btn grow" data-a="create"${online?"":" disabled"}>Создать игру</button></div>
+  <label class="row note" for="pubchk"><input type="checkbox" id="pubchk" checked> Открытая комната (видна в списке)</label>
+  <div class="row"><div class="grow"><input type="text" id="code" maxlength="6" autocomplete="off" placeholder="КОД КОМНАТЫ" style="text-transform:uppercase;letter-spacing:.12em"></div><button class="btn ghost" data-a="join"${online?"":" disabled"}>Подключиться</button></div>
+  <button class="btn ghost" data-a="local">Играть за одним устройством</button>
+  <p class="err" id="err"></p><p class="note">${esc(note)}</p></div></section>
+  <section class="sec"><div class="sech"><span class="pill">Присоединяйся к любой партии</span><h2>Открытые комнаты</h2></div><div class="sec" id="pub">${pubHtml()}</div></section>
+  <section class="sec"><div class="sech"><span class="pill">Выбирает ведущий в лобби</span><h2>Режимы игры</h2></div><div class="modes">${MODES.map(m=>`<div class="mode"><h3>${esc(m.name)}</h3><p>${esc(m.desc)}</p><span class="meta">раундов до ${m.rounds} · обсуждение ${m.discuss} с</span></div>`).join("")}</div></section>
+  <section class="sec"><div class="sech"><span class="pill">Этапы партии</span><h2>Как играть</h2><p>Партия идёт до 5 раундов. В каждом раунде игроки открывают карты, спорят и голосуют, кого выгнать из бункера.</p></div><div class="steps">
+   <div class="step"><b>Карты</b><p>Каждому выдают секретный профиль: профессия, здоровье, багаж, секрет 18+ и ещё пять карт.</p></div>
+   <div class="step"><b>Открытие</b><p>В раунде каждый открывает хотя бы одну карту. В первом раунде принято начинать с профессии.</p></div>
+   <div class="step"><b>Обсуждение</b><p>Доказывайте, что вы нужнее остальных, и вскрывайте чужие слабости. Таймер не ждёт.</p></div>
+   <div class="step"><b>Голосование</b><p>Все голосуют тайно. Игрок с наибольшим числом голосов уходит и показывает все карты.</p></div>
+   <div class="step"><b>Финал</b><p>Когда мест в бункере столько, сколько осталось игроков, считается итог и оглашается судьба мира.</p></div></div></section>
+  <section class="sec"><div class="sech"><span class="pill">Набор 18+</span><h2>Игровые карты</h2></div><div class="stats">
+   <span class="stat"><b>${cnt("prof")}</b> профессий</span><span class="stat"><b>${cnt("health")}</b> болезней</span><span class="stat"><b>${cnt("hobby")}</b> хобби</span><span class="stat"><b>${cnt("bag")}</b> предметов багажа</span><span class="stat"><b>${cnt("fact")}</b> фактов</span><span class="stat"><b>${cnt("trait")}</b> характеров</span><span class="stat"><b>${cnt("secret")+cnt("dirty")}</b> секретов 18+</span><span class="stat"><b>${cnt("spec")}</b> особых условий</span><span class="stat"><b>${CATA.length}</b> катастроф</span></div></section>
+  <footer><p>Игра для компании взрослых. Алкогольные штрафы по желанию: заменяйте напитки на любые безалкогольные.</p></footer></div>`;
+}
+
+function modePicker(){
+  const host=isHost();
+  return `<div class="modes pick">${MODES.map(m=>`<${host?"button":"div"} class="mode${ROOM.mode===m.id?" on":""}"${host?` data-a="mode" data-v="${m.id}"`:""}><h3>${esc(m.name)}</h3><p>${esc(m.desc)}</p><span class="meta">до ${m.rounds} раундов · таймеры ${m.open}/${m.discuss}/${m.vote} с</span></${host?"button":"div"}>`).join("")}</div>`;
+}
+function lobbyHtml(){
+  const ps=plist(),host=isHost(),local=NET.kind==="local";
+  return header(`<button class="btn ghost sm" data-a="leave">Выйти</button>`)+`<div class="wrap" style="padding-top:20px">
+  <section class="panel">${local?`<h2>Игра за одним устройством</h2><p class="note">Передавайте экран по кругу: каждый смотрит свои карты только когда никто не подглядывает.</p>`:`<span class="lab">Код комнаты</span><div class="code">${esc(ROOM.code)}</div><div class="row"><button class="btn ghost sm" data-a="copy" data-v="${esc(ROOM.code)}">Скопировать код</button><span class="note">Друзья вводят его на главной странице.</span></div>`}</section>
+  <section class="sec"><h2>Игроки: ${ps.length}</h2><div class="plist">${ps.map(p=>`<div class="pl"><span>${esc(p.nick)}</span>${ROOM.host===p.id?`<span class="tag a">ведущий</span>`:p.id===myId()?`<span class="tag m">вы</span>`:local?`<button class="btn ghost sm" data-a="rm" data-v="${esc(p.id)}">убрать</button>`:""}</div>`).join("")}</div>
+  ${local?`<div class="row"><div class="grow"><input type="text" id="lname" maxlength="16" placeholder="Имя игрока" autocomplete="off"></div><button class="btn" data-a="addLocal">Добавить</button></div>`:""}</section>
+  <section class="sec"><h2>Режим${host?"":": выбирает ведущий"}</h2>${modePicker()}</section>
+  <section class="row">${host?`<button class="btn" data-a="start"${ps.length<3?" disabled":""}>Начать игру</button><span class="note">${ps.length<3?"Нужно минимум 3 игрока.":"В бункере будет "+Math.ceil(ps.length/2)+" мест."}</span>`:`<span class="note">Ждём, пока ведущий начнёт игру.</span>`}</section></div>`;
+}
+
+const PH={open:"Открытие карт",discuss:"Обсуждение",vote:"Голосование",result:"Итоги раунда"};
+function dossier(p){
+  const out=isOut(p.id),rv=p.revealed||{},fl=p.full||null,me=p.id===myId();
+  const cells=CATS.map(([k,l])=>{let c="shut",t="закрыто";if(rv[k]){c="open";t=rv[k]}else if(fl&&fl[k]){c="late";t=fl[k].t}return `<div class="cell ${c}" data-k="${k}"><span class="lb">${l}</span><span class="tx">${esc(t)}</span></div>`}).join("");
+  let st="";
+  if(ROOM.phase==="vote"&&!out)st=p.voteRound===ROOM.round&&p.vote?`<span class="tag g">голос отдан</span>`:`<span class="tag m">думает</span>`;
+  if(ROOM.phase==="open"&&!out)st=p.openedRound===ROOM.round?`<span class="tag g">открыл</span>`:`<span class="tag m">молчит</span>`;
+  const tc=ROOM.phase==="result"&&ROOM.tally&&ROOM.tally[p.id]!=null?`<div class="votes">голосов против: ${ROOM.tally[p.id]}</div>`:"";
+  return `<div class="fold${me?" me":""}${out?" out":""}"><header><b>${esc(p.nick)}</b>${out?`<span class="tag r">изгнан</span>`:me?`<span class="tag a">вы</span>`:st}</header>${out?`<div class="stamp">ИЗГНАН</div>`:""}${tc}${cells}</div>`;
+}
+function handHtml(){
+  const id=myId(),local=NET.kind==="local",h=myHand(),out=isOut(id);
+  const ps=plist();
+  let sel="";
+  if(local)sel=`<div class="row"><span class="lab">Кто смотрит</span><div class="chips">${ps.map(p=>`<button class="chip${p.id===VIEW?" on":""}" data-a="view" data-v="${esc(p.id)}">${esc(p.nick)}${isOut(p.id)?" ✕":""}</button>`).join("")}</div></div>`;
+  if(local&&!VIEW)return `<section class="hand"><h2>Ваши карты</h2>${sel}<p class="note">Выберите игрока, чтобы посмотреть его карты. Остальные в это время отворачиваются.</p></section>`;
+  if(!h)return `<section class="hand"><h2>Ваши карты</h2>${sel}<p class="note">Раздаём карты…</p></section>`;
+  const show=!local||SHOW;
+  const can=!out&&["open","discuss"].includes(ROOM.phase);
+  const rv=(PLAYERS[id]&&PLAYERS[id].revealed)||{};
+  const trait=MODE(ROOM.mode).traitor&&traitorId()===id;
+  const body=show?`<div class="hgrid">${CATS.map(([k,l])=>{const c=h.cards[k],done=!!rv[k];return `<div class="hc${done?" done":""}" data-k="${k}"><span class="lb">${l}</span><span class="tx">${esc(c.t)}</span>${done?`<span class="tag g" style="align-self:flex-start">открыта</span>`:can?`<button class="btn sm" data-a="reveal" data-v="${k}">Открыть</button>`:""}</div>`}).join("")}</div>`:`<p class="note">Карты скрыты. Нажмите «Показать», когда рядом нет посторонних глаз.</p>`;
+  return `<section class="hand"><div class="row" style="justify-content:space-between"><h2>Ваши карты${local&&VIEW&&PLAYERS[VIEW]?": "+esc(PLAYERS[VIEW].nick):""}</h2>${local?`<button class="btn ghost sm" data-a="toggleHand">${SHOW?"Скрыть":"Показать"}</button>`:""}</div>${sel}
+  ${out?`<p class="note">Вы изгнаны и наблюдаете за игрой. Ваши карты уже открыты всем.</p>`:""}
+  ${trait&&show?`<div class="warnbox red"><span class="lab">Тайная миссия</span><p>Вы Предатель. Доживите до финала и не выдайте себя. Если вы в числе выживших, бункер проиграл.</p></div>`:""}
+  ${body}</section>`;
+}
+function votePanel(){
+  const id=myId(),al=alive(),me=PLAYERS[id];
+  if(NET.kind==="local"&&!VIEW)return `<section class="panel"><h2>Голосование</h2><p class="note">Выберите в блоке «Ваши карты», кто сейчас голосует.</p></section>`;
+  if(!me||isOut(id))return `<section class="panel"><h2>Голосование</h2><p class="note">Изгнанные не голосуют.</p></section>`;
+  const cur=me.voteRound===ROOM.round?me.vote:null;
+  return `<section class="panel"><h2>Кого изгнать${NET.kind==="local"?": голосует "+esc(me.nick):""}</h2><div class="vote">${al.filter(p=>p.id!==id).map(p=>`<button class="btn ghost${cur===p.id?" on":""}" data-a="vote" data-v="${esc(p.id)}">${esc(p.nick)}</button>`).join("")}</div><p class="note">Голос можно менять, пока идёт голосование.</p></section>`;
+}
+function controls(){
+  const h=isHost(),ph=ROOM.phase,al=alive();
+  let info="",btn="";
+  if(ph==="open"){const n=al.filter(p=>p.openedRound===ROOM.round).length;info=`Открыли карту: ${n} из ${al.length}.`;btn=`<button class="btn" data-a="toDiscuss">К обсуждению</button>`}
+  if(ph==="discuss"){info="Идёт обсуждение. Убеждайте, обвиняйте, торгуйтесь.";btn=`<button class="btn" data-a="toVote">К голосованию</button>`}
+  if(ph==="vote"){const n=al.filter(p=>p.voteRound===ROOM.round&&p.vote).length;info=`Проголосовали: ${n} из ${al.length}.`;btn=`<button class="btn" data-a="tally">Подвести итоги</button>`}
+  if(ph==="result"){const fin=ROOM.round>=ROOM.rounds;info="";btn=`<button class="btn" data-a="next">${fin?"К финалу":"Следующий раунд"}</button>`}
+  return `<div class="row"><span>${esc(info)}</span>${h?btn:`<span class="note">Дальше ведёт ведущий.</span>`}</div>`;
+}
+function gameHtml(){
+  const m=MODE(ROOM.mode),ps=plist(),al=alive(),ph=ROOM.phase;
+  const out=(ROOM.lastOut||[]).map(id=>PLAYERS[id]).filter(Boolean);
+  const b=ROOM.bunker||{feats:[],flaw:{t:""},size:{t:""},sup:{t:""}};
+  const res=ph==="result"?`<section class="panel"><h2>${out.length>1?"Покидают бункер":"Покидает бункер"}: ${out.map(p=>esc(p.nick)).join(", ")}</h2>
+   <div class="sec">${ps.filter(p=>ROOM.tally&&ROOM.tally[p.id]!=null).sort((a,c)=>ROOM.tally[c.id]-ROOM.tally[a.id]).map(p=>{const mx=Math.max(1,...Object.values(ROOM.tally));return `<div><div class="row" style="justify-content:space-between"><span>${esc(p.nick)}</span><span class="mono">${ROOM.tally[p.id]}</span></div><div class="bar"><i style="width:${ROOM.tally[p.id]/mx*100}%"></i></div></div>`}).join("")}</div>
+   ${ROOM.penalty?`<div class="warnbox"><span class="lab">Штраф раунда</span><p>${esc(ROOM.penalty)}</p></div>`:""}</section>`:"";
+  return header(`<button class="btn ghost sm" data-a="leave">Выйти</button>`)+`<div class="wrap" style="padding-top:16px">
+  <div class="band"><span class="ph">${PH[ph]}</span>
+   <span class="it"><span class="lab">Раунд</span><b>${ROOM.round} / ${ROOM.rounds}</b></span>
+   <span class="it"><span class="lab">Мест в бункере</span><b>${ROOM.seats}</b></span>
+   <span class="it"><span class="lab">В игре</span><b>${al.length}</b></span>
+   <span class="it"><span class="lab">Режим</span><b>${esc(m.name)}</b></span>
+   ${ROOM.deadline&&["open","discuss","vote"].includes(ph)?`<span class="it"><span class="lab">Таймер</span><b id="tm"></b></span>`:""}</div>
+  ${ROOM.event&&ph!=="result"?`<div class="warnbox"><span class="lab">Событие раунда</span><p>${esc(ROOM.event)}</p></div>`:""}
+  ${controls()}
+  ${res}
+  <div class="scen"><section class="panel"><span class="lab">Катастрофа</span><h3>${esc((ROOM.cata||{}).t)}</h3><p class="note">${esc((ROOM.cata||{}).d||"")}</p></section>
+   <section class="panel"><span class="lab">Бункер</span><h3>${esc(b.size.t)}, запасов ${esc(b.sup.t)}</h3><ul>${b.feats.map(f=>`<li>${esc(f.t)}</li>`).join("")}<li>Минус: ${esc(b.flaw.t)}</li></ul></section></div>
+  ${handHtml()}
+  ${ph==="vote"?votePanel():""}
+  <section class="sec"><h2>Досье игроков</h2><div class="folders">${ps.map(dossier).join("")}</div></section></div>`;
+}
+
+/* ───────── финал ───────── */
+function survivorData(){
+  return alive().map(p=>{
+    const src=p.full||(NET.kind==="local"&&HANDS[p.id]?HANDS[p.id].cards:null)||{};
+    return{id:p.id,nick:p.nick,cards:src};
+  });
+}
+function makeVerdict(){
+  const m=MODE(ROOM.mode),r=rng(ROOM.seed||"x"),sv=survivorData(),n=Math.max(1,sv.length);
+  let total=0,best=null,worst=null;
+  sv.forEach(s=>{let t=0;for(const k in s.cards){const c=s.cards[k];if(c&&typeof c.s==="number")t+=c.s;
+      if(k!=="bio"&&k!=="spec"&&c){if(!best||c.s>best.c.s)best={s,c,k};if(!worst||c.s<worst.c.s)worst={s,c,k}}}
+    s.total=t;total+=t});
+  const b=ROOM.bunker||{size:{s:0},sup:{s:0},feats:[],flaw:{s:0}};
+  const bs=(b.size.s||0)+(b.sup.s||0)+b.feats.reduce((a,f)=>a+f.s,0)+(b.flaw.s||0);
+  const hard=((ROOM.cata||{}).h||2);
+  const val=total/n-(hard-2)*1.5+bs*.35;
+  let title,body;
+  if(val>=7){title="Золотой век под землёй";body="Бункер превратился в образцовое общество: еды хватает, энтузиазма больше, чем нужно, а споры решаются голосованием."}
+  else if(val>=4){title="Выжили, местами со скрипом";body="Бункер держится. Кто-то храпит, кто-то воровал консервы, но в целом общество устояло."}
+  else if(val>=1){title="Бункер трещит по швам";body="Выжившие дотянули до весны, но половина уже строит планы на побег, а вторая половина на заговор."}
+  else{title="Это была ошибка";body="Состав подобрали так, что даже тараканы собрали вещи. Первая зима оказалась последней для идеи совместной жизни."}
+  const parts=[`Катастрофа «${(ROOM.cata||{}).t}» осталась снаружи. ${body}`];
+  if(best)parts.push(`Главная опора бункера: ${best.s.nick}. Козырь: «${best.c.t}» (${CATL[best.k].toLowerCase()}).`);
+  if(worst&&worst!==best)parts.push(`Слабое звено: ${worst.s.nick}. Все помнят про «${worst.c.t}» (${CATL[worst.k].toLowerCase()}), и это сильно портит атмосферу.`);
+  if(m.eden){
+    const fm=sv.some(s=>s.cards.bio&&s.cards.bio.g==="м"&&s.cards.bio.f),ff=sv.some(s=>s.cards.bio&&s.cards.bio.g==="ж"&&s.cards.bio.f);
+    parts.push(fm&&ff?"В бункере есть детородная пара, значит, человечество продолжится. Правда, в вопросе фамилий уже идёт спор.":"Детородной пары в бункере нет. Человечество вымрет, зато красиво и в хорошей компании.");
+  }
+  parts.push(pick(FLAVOR,r));
+  let traitor=null;
+  if(m.traitor){const tid=traitorId(),t=PLAYERS[tid];if(t){const win=!isOut(tid);traitor={nick:t.nick,win};parts.push(win?`Предатель ${t.nick} дожил до финала. Бункер проиграл.`:`Предателя ${t.nick} изгнали. Бункер выиграл.`)}}
+  return{title,parts,sv,traitor};
+}
+function finalHtml(){
+  const v=makeVerdict(),ps=plist();
+  return header(`<button class="btn ghost sm" data-a="leave">Выйти</button>`)+`<div class="wrap" style="padding-top:20px">
+  <section class="panel verdict"><span class="lab">Финал · ${esc(MODE(ROOM.mode).name)}</span><h2>${esc(v.title)}</h2>${v.parts.map(t=>`<p>${esc(t)}</p>`).join("")}
+  ${K.sample?`<div class="row"><button class="btn ghost sm" data-a="ai" id="aibtn">Финал от Claude</button><span class="note">Свой вариант финала по картам выживших.</span></div><p id="ai"></p>`:""}</section>
+  <section class="sec"><h2>Выжившие</h2><div class="folders">${ps.filter(p=>!isOut(p.id)).map(dossier).join("")}</div></section>
+  <section class="sec"><h2>Изгнанные</h2><div class="folders">${ps.filter(p=>isOut(p.id)).map(dossier).join("")||`<p class="note">Никого.</p>`}</div></section>
+  ${NET.kind==="local"?`<div class="row"><button class="btn" data-a="again">Новая партия с теми же игроками</button></div>`:""}</div>`;
+}
+async function aiFinal(){
+  const el=$("#ai"),btn=$("#aibtn");if(!el||!K.sample)return;
+  const v=makeVerdict(),c=ROOM.cata||{},b=ROOM.bunker;
+  const txt=v.sv.map(s=>s.nick+": "+CATS.map(([k,l])=>s.cards[k]?l+" — "+s.cards[k].t:"").filter(Boolean).join("; ")).join("\n");
+  const prompt="Ты ведущий взрослой игры «Бункер 18+». Напиши финал партии по-русски, 6-8 предложений, с чёрным юмором и лёгкой пошлостью, без откровенных сцен. Катастрофа: "+c.t+" — "+c.d+". Бункер: "+b.size.t+", запасы "+b.sup.t+", есть: "+b.feats.map(f=>f.t).join(", ")+", минус: "+b.flaw.t+". Выжившие и их карты:\n"+txt+"\nУпомяни каждого выжившего по имени и расскажи, чем кончилась их жизнь в бункере.";
+  btn.disabled=true;el.textContent="Claude пишет финал…";
+  try{const r=await K.sample(prompt,{onText:x=>{el.textContent=x.text},cache:false});el.textContent=r.text}
+  catch(e){el.textContent="Не получилось: "+((e&&e.message)||"отказ")}
+  btn.disabled=false;
+}
+
+/* ───────── клики ───────── */
+const ACT={
+  adult(){ADULT=true;try{sessionStorage.setItem(KEY,"1")}catch(e){}route()},
+  notadult(){setErr("Тогда эта страница не для вас.")},
+  create:createRoom,
+  join(){joinRoom()},
+  joinCode(v){const n=$("#nick");if(n&&!n.value.trim()){setErr("Сначала введите позывной.");return}joinRoom(v)},
+  local:startLocal,
+  leave(){leave()},
+  copy(v){try{navigator.clipboard.writeText(v).then(()=>toast("Код скопирован"),()=>toast("Код: "+v))}catch(e){toast("Код: "+v)}},
+  mode(v){wRoom({mode:v})},
+  start:startGameFixed,
+  reveal,
+  vote:castVote,
+  toDiscuss,toVote,tally,next:nextRound,
+  view(v){VIEW=v;SHOW=false;route()},
+  toggleHand(){SHOW=!SHOW;route()},
+  addLocal(){
+    const i=$("#lname");const n=(i&&i.value||"").trim().slice(0,16);if(!n)return;
+    if(Object.keys(PLAYERS).length>=16){toast("Максимум 16 игроков.");return}
+    const id="p"+(Date.now()%1e6)+Math.floor(Math.random()*99);
+    PLAYERS[id]=newPlayer(n);PLAYERS[id].joined=Date.now()+Object.keys(PLAYERS).length;route();
+  },
+  rm(v){delete PLAYERS[v];route()},
+  again(){
+    const keep=plist();PLAYERS={};keep.forEach(p=>{PLAYERS[p.id]=newPlayer(p.nick);PLAYERS[p.id].joined=p.joined});
+    HANDS={};VIEW=null;SHOW=false;TALLYKEY="";
+    ROOM=Object.assign(ROOM,{phase:"lobby",round:0,eliminated:[],lastOut:[],tally:{},penalty:null,event:null});route();
+  },
+  ai:aiFinal
+};
+app.addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(!b||b.disabled)return;const f=ACT[b.dataset.a];if(f)f(b.dataset.v,b)});
+app.addEventListener("keydown",e=>{
+  if(e.key!=="Enter")return;
+  if(e.target.id==="lname")ACT.addLocal();
+  if(e.target.id==="code")ACT.join();
+});
+
+/* ───────── таймер ───────── */
+setInterval(()=>{
+  if(!ROOM||!ROOM.deadline)return;
+  const left=Math.ceil((ROOM.deadline-Date.now())/1000),el=$("#tm");
+  if(el){el.textContent=left>0?mmss(left):"время вышло";el.classList.toggle("over",left<=0)}
+  if(NET.kind==="online"&&isHost()&&left<-1&&["open","discuss","vote"].includes(ROOM.phase)){
+    const key=ROOM.round+":"+ROOM.phase;
+    if(AUTOKEY!==key){AUTOKEY=key;if(ROOM.phase==="open")toDiscuss();else if(ROOM.phase==="discuss")toVote();else tally()}
+  }
+},500);
+
+route();
+initCaps();
+</script>
+
+</html>
